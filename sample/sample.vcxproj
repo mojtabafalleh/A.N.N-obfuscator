@@ -24,6 +24,7 @@
     <ProjectGuid>{6c3b4622-bda2-4d05-9c50-99c22f473017}</ProjectGuid>
     <RootNamespace>OBFUSCATEexe</RootNamespace>
     <WindowsTargetPlatformVersion>10.0</WindowsTargetPlatformVersion>
+    <ProjectName>sample</ProjectName>
   </PropertyGroup>
   <Import Project="$(VCTargetsPath)\Microsoft.Cpp.Default.props" />
   <PropertyGroup Condition="'$(Configuration)|$(Platform)'=='Debug|Win32'" Label="Configuration">
