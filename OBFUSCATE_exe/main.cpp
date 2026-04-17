@@ -44,7 +44,7 @@ std::vector<double> forward_pass(const std::vector<double>& inputs) {
     };
 
     std::vector<std::vector<double>> weights_layer3 = {
-        {0.103, 0.312, 0.300, 0.020}
+        {0.103, 0.312, 0.300, 0.010}
     };
 
     std::vector<double> bias_l1 = {0.2, 0.5, 0.5, 0.5};
