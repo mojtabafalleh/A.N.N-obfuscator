@@ -1,0 +1,3 @@
+[submodule "deps/BinaryShield"]
+	path = deps/BinaryShield
+	url = https://github.com/connorjaydunn/BinaryShield.git
