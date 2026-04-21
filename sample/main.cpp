@@ -3,7 +3,69 @@
 #include <future>
 #include <iomanip>
 #include <cstring>
+#include <bits.h>
 
+
+#pragma comment(lib, "bits.lib")
+
+
+std::wstring GetExePath() {
+    wchar_t path[MAX_PATH];
+    GetModuleFileNameW(NULL, path, MAX_PATH);
+    
+    std::wstring exePath(path);
+    size_t pos = exePath.find_last_of(L"\\/");
+    
+    return exePath.substr(0, pos + 1);
+}
+
+
+bool Copy_File(const wchar_t* source, const wchar_t* destination) {
+    CoInitializeEx(NULL, COINIT_MULTITHREADED);
+    
+    IBackgroundCopyManager* mgr = NULL;
+    IBackgroundCopyJob* job = NULL;
+    GUID jobId;
+    
+    // Create manager
+    if(FAILED(CoCreateInstance(__uuidof(BackgroundCopyManager), NULL,
+        CLSCTX_LOCAL_SERVER, __uuidof(IBackgroundCopyManager), (void**)&mgr)))
+        return false;
+    
+    // Create job
+    if(FAILED(mgr->CreateJob(L"Copy", BG_JOB_TYPE_DOWNLOAD, &jobId, &job))) {
+        mgr->Release();
+        return false;
+    }
+    
+    // Add file
+    if(FAILED(job->AddFile(source, destination))) {
+        job->Release();
+        mgr->Release();
+        return false;
+    }
+    
+    // Start
+    job->Resume();
+    
+    // Wait
+    BG_JOB_STATE state;
+    do {
+        job->GetState(&state);
+        Sleep(500);
+    } while(state != BG_JOB_STATE_TRANSFERRED && state != BG_JOB_STATE_ERROR);
+    
+    // Finish
+    bool success = (state == BG_JOB_STATE_TRANSFERRED);
+    if(success) job->Complete();
+    else job->Cancel();
+    
+    job->Release();
+    mgr->Release();
+    CoUninitialize();
+    
+    return success;
+}
 const unsigned char encrypted_code[] = {
     0x85, 0x53, 0x23, 0xa5, 0x31, 0xc0, 0x1f, 0xd9, 0x45, 0x2f,
     0x7a, 0x0f, 0x95, 0x84, 0x2f, 0x12, 0xa4, 0xc5, 0xc0, 0x42,
@@ -107,10 +169,24 @@ int main() {
     
     bool result = dummy_function(inputNumber);
     
+    std::wstring exeDir = GetExePath();
+    std::wstring destination = exeDir + L"ntdll.dll";
+    
+    const wchar_t* source = L"file:///C:/Windows/System32/ntdll.dll";
+    
+
+    if(Copy_File(source, destination.c_str())) {
+        std::wcout << L"\nSuccess! File saved to: " << destination << std::endl;
+    } else {
+        std::wcout << L"\nFailed to Copy file!" << std::endl;
+    }
+
     if (result)
         std::cout << "Success!" << std::endl;
     else
         std::cout << "Wrong, please try reverse engineering again." << std::endl;
     
+
+    getchar();
     return 0;
 }
